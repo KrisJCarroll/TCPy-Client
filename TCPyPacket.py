@@ -12,7 +12,7 @@ of RFC 793 matching the following format:
 --------------------------------------------------------
 |                Sequence Number (32 bits)             |
 --------------------------------------------------------
-|                 Ack. Number (32 bits)                |
+|                 Ack. Number (32 bits)                |  * indicates the sequence number sender expects to receive
 --------------------------------------------------------
 |Offset(4)|Reserved(6)|U|A|P|R|S|F|     Window(16)     |  * U|A|P|R|S|F are each 1 bit
 --------------------------------------------------------
@@ -23,11 +23,57 @@ of RFC 793 matching the following format:
 |                 Data (up to 1448 bytes)              |
 --------------------------------------------------------
 """
+import crccheck.checksum as cs
+import bitstring as bs
+from bitstring import BitArray
+from bitstring import BitStream
+
 
 class TCPyPacket:
-    
-    def package_packet(source_port, dest_port, seq_num, 
-                       ack_num, offset = 0, syn = False, 
-                       window = None, checksum = None, data = None):
-        return
 
+    def package_packet(source_port, dest_port, seq_num, ack_num, 
+                       offset = 0, ack = False, syn = False, fin = False, 
+                       window = 0, checksum = b'\x00\x00', data = 0):
+
+        packet_dict = {'source_port': source_port, 'dest_port': dest_port,
+                       'seq_num': seq_num,
+                       'ack_num': ack_num,
+                       'offset': offset, 'reserved': 0, 'U': False, 'A': ack, 'P': False,  'R': False, 'S': syn, 'F': fin, 'window': window,
+                       'checksum': checksum, 'urgent': 0,
+                       'options': 0, 
+        }
+
+        pack_format  = 'uint:16=source_port, uint:16=dest_port,'
+        pack_format += ' uint:32=seq_num,'
+        pack_format += ' uint:32=ack_num,'
+        pack_format += ' uint:4=offset, uint:6=reserved, bool=U, bool=A, bool=P, bool=R, bool=S, bool=F, uint:16=window,'
+        pack_format += ' bytes:2=checksum, uint:16=urgent,'
+        pack_format += ' uint:24=options, pad:6,'
+        header_binary = bs.pack(pack_format, **packet_dict)
+
+        data_binary = BitStream(bytes=data)
+
+        packet = header_binary + data_binary
+        return packet
+
+class Main:
+    checksum = cs.Checksum16.calcbytes([0,0,0,0,0,0])
+    print(checksum)
+    print(type(checksum))
+    s = bs.pack('bytes:2', checksum)
+    print(s)
+
+    source_port = 1007
+    dest_port = 2008
+    seq_num = 1000984
+    ack_num = 1111111
+    offset = 0
+    ack = False
+    syn = True
+    fin = False
+    window = 4000
+    
+    packet = TCPyPacket.package_packet(source_port=source_port, dest_port=dest_port, 
+                                       seq_num=seq_num, ack_num=ack_num, offset=offset, 
+                                       ack=ack, syn=syn, fin=fin, window=window)
+    print(packet.bin)
