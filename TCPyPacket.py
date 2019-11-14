@@ -31,15 +31,21 @@ from bitstring import BitStream
 
 class TCPyPacket:
 
+    def calc_checksum(packet):
+        # ensure checksum is 0'ed out
+        packet.overwrite(b'\x00\x00', 128)
+        checksum = cs.Checksum16.calcbytes(packet.tobytes())
+        packet.overwrite(checksum, 128)
+
     def package_packet(source_port, dest_port, seq_num, ack_num, 
                        offset = 0, ack = False, syn = False, fin = False, 
-                       window = 0, checksum = b'\x00\x00', data = 0):
+                       window = 0, data = 0):
 
         packet_dict = {'source_port': source_port, 'dest_port': dest_port,
                        'seq_num': seq_num,
                        'ack_num': ack_num,
                        'offset': offset, 'reserved': 0, 'U': False, 'A': ack, 'P': False,  'R': False, 'S': syn, 'F': fin, 'window': window,
-                       'checksum': checksum, 'urgent': 0,
+                       'checksum': b'\x00\x00', 'urgent': 0,
                        'options': 0, 
         }
 
@@ -53,15 +59,15 @@ class TCPyPacket:
 
         data_binary = BitStream(bytes=data)
 
+        # combine the header and the data and fill out checksum
         packet = header_binary + data_binary
+        print(packet.bin)
+        TCPyPacket.calc_checksum(packet)
+        print(packet.bin)
+
         return packet
 
 class Main:
-    checksum = cs.Checksum16.calcbytes([0,0,0,0,0,0])
-    print(checksum)
-    print(type(checksum))
-    s = bs.pack('bytes:2', checksum)
-    print(s)
 
     source_port = 1007
     dest_port = 2008
