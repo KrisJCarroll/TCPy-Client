@@ -78,8 +78,9 @@ class Main:
     syn = True
     fin = False
     window = 4000
+    data = b'24'
     
     packet = TCPyPacket.package_packet(source_port=source_port, dest_port=dest_port, 
                                        seq_num=seq_num, ack_num=ack_num, offset=offset, 
-                                       ack=ack, syn=syn, fin=fin, window=window)
+                                       ack=ack, syn=syn, fin=fin, window=window, data=data)
     print(packet.bin)
