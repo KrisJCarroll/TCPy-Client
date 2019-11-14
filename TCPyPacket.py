@@ -67,20 +67,3 @@ class TCPyPacket:
 
         return packet
 
-class Main:
-
-    source_port = 1007
-    dest_port = 2008
-    seq_num = 1000984
-    ack_num = 1111111
-    offset = 0
-    ack = False
-    syn = True
-    fin = False
-    window = 4000
-    data = b'24'
-    
-    packet = TCPyPacket.package_packet(source_port=source_port, dest_port=dest_port, 
-                                       seq_num=seq_num, ack_num=ack_num, offset=offset, 
-                                       ack=ack, syn=syn, fin=fin, window=window, data=data)
-    print(packet.bin)
