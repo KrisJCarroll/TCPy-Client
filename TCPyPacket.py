@@ -23,21 +23,36 @@ of RFC 793 matching the following format:
 |                 Data (up to 1448 bytes)              |
 --------------------------------------------------------
 """
+import sys
 import crccheck.checksum as cs
 import bitstring as bs
+import socket
 from bitstring import BitArray
 from bitstring import BitStream
 
 
 class TCPyPacket:
+    TCP_PTCL = (6).to_bytes(1, byteorder="big")
 
-    def calc_checksum(packet):
+    def calc_checksum(packet, pseudo_header):
         # ensure checksum is 0'ed out
         packet.overwrite(b'\x00\x00', 128)
-        checksum = cs.Checksum16.calcbytes(packet.tobytes())
+        cs_calc = cs.Checksum16()
+        cs_calc.process(packet.tobytes())
+        cs_calc.process(pseudo_header)
+        checksum = cs_calc.finalbytes()
         packet.overwrite(checksum, 128)
 
-    def package_packet(source_port, dest_port, seq_num, ack_num, 
+    def create_pseudo_header(source_address, dest_address, length):
+        pseudo_header  = bytearray()
+        pseudo_header += bytearray(socket.inet_aton(source_address))
+        pseudo_header += bytearray(socket.inet_aton(dest_address))
+        pseudo_header += bytearray(b'\x00')
+        pseudo_header += bytearray(TCPyPacket.TCP_PTCL) 
+        pseudo_header += length.to_bytes(2, byteorder="big")
+        return pseudo_header
+
+    def package_packet(source_address, dest_address, source_port, dest_port, seq_num, ack_num, 
                        offset = 0, ack = False, syn = False, fin = False, 
                        window = 0, data = 0):
 
@@ -61,9 +76,13 @@ class TCPyPacket:
 
         # combine the header and the data and fill out checksum
         packet = header_binary + data_binary
-        print(packet.bin)
-        TCPyPacket.calc_checksum(packet)
-        print(packet.bin)
+        length = len(packet) % 8
+        pseudo_header = TCPyPacket.create_pseudo_header(source_address, dest_address, length)
+        print(len(pseudo_header))
+        
+
+
+        TCPyPacket.calc_checksum(packet, pseudo_header)
 
         return packet
 
