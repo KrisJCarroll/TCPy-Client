@@ -219,5 +219,3 @@ class Main:
                                        source_port=source_port, dest_port=dest_port, 
                                        seq_num=seq_num, ack_num=ack_num, offset=offset, 
                                        ack=ack, syn=syn, fin=fin, window=window, data=data)
-    print(packet.bin)
-    print("Hello world.")
