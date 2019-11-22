@@ -52,16 +52,33 @@ class TCPyPacket:
         pseudo_header += length.to_bytes(2, byteorder="big")
         return pseudo_header
 
+    # returns syn/ack'ed seq number and ack number if SYN and ACK set, else returns (False, False)
+    def check_synack(packet_bytes):
+        packet_binary = BitStream(bytes=packet_bytes)
+        try:
+            if packet_binary[110] and packet_binary[107]:
+                seq_binary = packet_binary[32:64]
+                ack_binary = packet_binary[64:96]
+                seq_num = seq_binary.int
+                ack_num = ack_binary.int
+                return (seq_num, ack_num)
+            return (False, False)
+        except:
+            return (False, False)
+
+    def is_fin(packet_bytes):
+        packet_binary = BitStream(bytes=packet_bytes)
+        return packet_binary[111]
+
     def package_packet(source_address, dest_address, source_port, dest_port, seq_num, ack_num, 
-                       offset = 0, ack = False, syn = False, fin = False, 
-                       window = 0, data = 0):
+                       offset = 5, ack = False, syn = False, fin = False, 
+                       window = 0, data = None):
 
         packet_dict = {'source_port': source_port, 'dest_port': dest_port,
                        'seq_num': seq_num,
                        'ack_num': ack_num,
                        'offset': offset, 'reserved': 0, 'U': False, 'A': ack, 'P': False,  'R': False, 'S': syn, 'F': fin, 'window': window,
                        'checksum': b'\x00\x00', 'urgent': 0,
-                       'options': 0, 
         }
 
         pack_format  = 'uint:16=source_port, uint:16=dest_port,'
@@ -69,17 +86,17 @@ class TCPyPacket:
         pack_format += ' uint:32=ack_num,'
         pack_format += ' uint:4=offset, uint:6=reserved, bool=U, bool=A, bool=P, bool=R, bool=S, bool=F, uint:16=window,'
         pack_format += ' bytes:2=checksum, uint:16=urgent,'
-        pack_format += ' uint:24=options, pad:6,'
         header_binary = bs.pack(pack_format, **packet_dict)
-
-        data_binary = BitStream(bytes=data)
-
-        # combine the header and the data and fill out checksum
-        packet = header_binary + data_binary
+        print(len(header_binary))
+        # combine the header and the data binary
+        if data:
+            data_binary = BitStream(bytes=data)
+            packet = header_binary + data_binary
+        # no data
+        else:
+            packet = header_binary
         length = len(packet) % 8
         pseudo_header = TCPyPacket.create_pseudo_header(source_address, dest_address, length)
-        print(len(pseudo_header))
-        
 
 
         TCPyPacket.calc_checksum(packet, pseudo_header)
