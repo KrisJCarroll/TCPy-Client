@@ -3,6 +3,8 @@ import socket as s
 import time
 import argparse
 
+MAX_BYTES = 1452
+
 class TCPyClient:
     #                                  SEQUENCE VARIABLES
     ############################################################################################
@@ -21,22 +23,18 @@ class TCPyClient:
     #           if RCV.NXT < seq_num < RCV.NXT + RCV.WND - sequenced numbers allowed for new reception
     #           if seq_num > RCV.NXT + RCV.WND - future sequence numbers not allowed
     ############################################################################################
-    SEND_SEQ_VARS = {
+    SEQ_VARS = {
         'SND.UNA' : 'first unacknowledged',
         'SND.NXT' : 'send next',
         'SND.WND' : 'send window',
         'SND.UP'  : 'send urgent pointer',
         'SND.WL1' : 'seg. seq. num for last window',
         'SND.WL2' : 'seg. ack num for last window',
+        'RCV.NXT' : 'next seq num expected from server', 
+        'RCV.WND' : 'size of window server will receive',
         'ISS'     : 'initial send sequence number'
     }
 
-    REC_SEQ_VARS = {
-        'RCV.NXT' : 'next seq num expected', # left edge of receive window
-        'RCV.WND' : 'receive window',
-        'RCV.UP'  : 'receive urgent pointer',
-        'IRS'     : 'intial receive seq. num'
-    }
 
     # NOTE: RCV.NXT + RCV.WIND-1 = last seq number expected on incoming segment, right edge of receive window
 
@@ -52,8 +50,6 @@ class TCPyClient:
         'SEG.ACK' : 'segment acknowledgement number',
         'SEG.LEN' : 'segment length',
         'SEG.WND' : 'segment window',
-        'SEG.UP'  : 'segment urgent pointer',
-        'SEG.PRC' : 'segment precedence value'
     }
 
     #       NOTE: SND.UNA < SEG.ACK <= SND.NXT = acceptable ack received by sender
@@ -70,10 +66,10 @@ class TCPyClient:
     
 
     def __init__(self, dest_address, source_port, dest_port, filename):
-        self.filename = filename
+        self.file = open(filename, "rb")
         # create socket and apply the appropriate connection information
         self.sock = s.socket(s.AF_INET, s.SOCK_STREAM)
-        self.sock.settimeout(1)
+        self.sock.settimeout(0.5)
         self.SOURCE_ADDRESS = s.gethostbyname(s.gethostname())
         self.DEST_ADDRESS = dest_address
         self.SOURCE_PORT = source_port
@@ -82,7 +78,7 @@ class TCPyClient:
         # connect to the server
         self.sock.connect(self.SERVER)
         # set the time-based initial sequence number
-        self.SEND_SEQ_VARS['ISS'] = int(time.time()) % 2**32 
+        self.SEQ_VARS['ISS'] = int(time.time()) % 2**32 
 
         # set up TCP states and handlers dictionary
         self.TCP_STATES = {
@@ -94,14 +90,15 @@ class TCPyClient:
             'TIME-WAIT': self.handle_time_wait,
             'CLOSED': self.handle_closed
         }
+        self.unack_packets = {}
 
     #                               CONNECTION STATE HANDLERS
     ############################################################################################
     # function for handling CLOSED state operations and events - this is the usual starting state
     def handle_closed(self):
         if self.send_syn():
-            self.SEND_SEQ_VARS['SND.UNA'] = self.SEND_SEQ_VARS['ISS'] # setting earliest sent unack to ISS
-            self.SEND_SEQ_VARS['SND.NXT'] = self.SEND_SEQ_VARS['ISS'] + 1 # setting next seq num to send
+            self.SEQ_VARS['SND.UNA'] = self.SEQ_VARS['ISS'] # setting earliest sent unack to ISS
+            self.SEQ_VARS['SND.NXT'] = self.SEQ_VARS['ISS'] + 1 # setting next seq num to send
             self.CURR_STATE = 'SYN_SENT'
             return
         # wasn't able to successfully send SYN
@@ -119,12 +116,14 @@ class TCPyClient:
                 bytes_packet = self.sock.recv(1500)
                 packet = pkt.unpack_packet(bytes_packet)
                 if packet['ACK'] and packet['SYN']:
-                    if packet['ACK_NUM'] != self.SEND_SEQ_VARS['SND.UNA']:
+                    if packet['ACK_NUM'] != self.SEQ_VARS['SND.UNA']:
                         print("ERROR({}): Wrong ACK for handshake.".format(self.CURR_STATE))
                         print("Shutting down client.")
                         self.sock.close()
                         exit(1)
+                    self.REC_SEQ_VARS['REC.NXT'] = packet['ACK_NUM'] # ACK of 101 means expecting SEQ 101
                     self.REC_SEQ_VARS['REC.WND'] = packet['WINDOW']
+                    self.send_ack(packet['SEQ_NUM'] + 1)
                     self.CURR_STATE = 'ESTABLISHED'
                     return
             except s.timeout:
@@ -136,6 +135,29 @@ class TCPyClient:
 
     # where the beef of the sending occurs
     def handle_established(self):
+        byte_data = self.file.read()
+        # repeatedly send new packets to fill remaining window and retransmit timed out packets
+        while True:
+            # grab the next bytes available to send
+            new_data = byte_data[self.SEQ_VARS['RCV.NXT'] : self.SEQ_VARS['RCV.NXT'] + self.SEQ_VARS['RCV.WND'] - 1]
+            data_chunks = [new_data[i * MAX_BYTES : (i+1) * MAX_BYTES] for i in range(len(new_data) // MAX_BYTES)]
+            for chunk in data_chunks:
+                new_packet = pkt.package_packet(source_address=self.SOURCE_ADDRESS, dest_address=self.DEST_ADDRESS,
+                                    source_port=self.SOURCE_PORT, dest_port=self.DEST_PORT, 
+                                    seq_num=self.SEQ_VARS['SND.NXT'], data=chunk)
+                # send the packets and handle errors
+                try:
+                    start_time = time.time()
+                    self.sock.send(new_packet)
+                    # update SND.NXT and add packet to list of unack'ed packets with timer
+                    self.SEQ_VARS['SND.NXT'] += len(chunk)
+                    self.unack_packets[self.SEQ_VARS['SND.NXT']] = (new_packet, start_time)
+                    
+                except s.timeout:
+                    print("ERROR({}): Error sending packet (seq = {}).".format(self.CURR_STATE, self.SEQ_VARS['SND.NXT']))
+                    print("Shutting down client.")
+                    self.sock.close()
+                    exit(1)
         return
     def handle_fin_wait_1(self):
         return
@@ -149,24 +171,24 @@ class TCPyClient:
     def send_syn(self):
         timeouts = 0
         packet = pkt.package_packet(source_address=self.SOURCE_ADDRESS, dest_address=self.DEST_ADDRESS,
-                                    source_port=self.source_port, dest_port=self.dest_port, 
-                                    seq_num=self.SEND_SEQ_VARS['ISS'], ack_num=0,
+                                    source_port=self.SOURCE_PORT, dest_port=self.DEST_PORT, 
+                                    seq_num=self.SEQ_VARS['ISS'], ack_num=0,
                                     syn=True)
         while timeouts < 3:
             try:
-                self.sock.sendall(packet)
+                self.sock.send(packet)
                 return True
             except s.timeout:
                 timeouts +=1
         return False
     
-    def send_ack(self):
+    def send_ack(self, num_to_ack):
         packet = pkt.package_packet(source_address=self.SOURCE_ADDRESS, dest_address=self.DEST_ADDRESS,
                                        source_port=self.source_port, dest_port=self.dest_port, 
-                                       seq_num=self.SEND_SEQ_VARS['SND.NXT'], ack_num=num_to_ack,
-                                       syn=True, window=0)
+                                       seq_num=self.SEQ_VARS['SND.NXT'], ack_num=num_to_ack,
+                                       ack=True, window=0)
 
-    def send(self, data):
+    def send(self):
         while True:
             return
 
