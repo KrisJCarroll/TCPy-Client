@@ -153,7 +153,7 @@ class TCPyClient:
             start_index = self.SEQ_VARS['SND.NXT'] - self.SEQ_VARS['ISS'] - 1
             print(start_index)
             print(self.SEQ_VARS['RCV.WND'])
-            end_index = (self.SEQ_VARS['SND.UNA'] + int(self.SEQ_VARS['RCV.WND'])) - self.SEQ_VARS['ISS']
+            end_index = (self.SEQ_VARS['SND.UNA'] + int(self.SEQ_VARS['RCV.WND'])) - self.SEQ_VARS['ISS'] - 1
             print(end_index)
             if end_index >= bytes_size - 1:
                 done = True
