@@ -102,7 +102,7 @@ class TCPyPacket:
 
     def package_packet(source_address, dest_address, source_port, dest_port, seq_num, ack_num = 0, 
                        offset = 5, ack = False, syn = False, fin = False, 
-                       window = 0, data = BitStream()):
+                       window = 0, data = False):
         packet_dict = {'source_port': source_port, 'dest_port': dest_port,
                        'seq_num': seq_num,
                        'ack_num': ack_num,
@@ -117,10 +117,12 @@ class TCPyPacket:
         pack_format += ' bytes:2=checksum, uint:16=urgent,'
         header_binary = bs.pack(pack_format, **packet_dict)
         # combine the header and the data binary
-        data_binary = BitStream(bytes=data)
-        packet = header_binary + data_binary
+        if data and len(data) > 0:
+            data_binary = BitStream(bytes=data)
+            packet = header_binary + data_binary
         # no data
-
+        else:
+            packet = header_binary
         length = len(packet) % 8
         pseudo_header = TCPyPacket.create_pseudo_header(source_address, dest_address, length)
 
