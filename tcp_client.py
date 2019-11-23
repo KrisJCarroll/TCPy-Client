@@ -157,7 +157,7 @@ class TCPyClient:
             new_size = end_index - start_index
             new_data = bytes_data[start_index : end_index]
 
-            data_chunks = [new_data[i * MAX_BYTES : (i+1) * MAX_BYTES] for i in range(len(new_data) // MAX_BYTES)]
+            data_chunks = [new_data[i * MAX_BYTES : (i+1) * MAX_BYTES] for i in range((len(new_data) // MAX_BYTES)+1)]
             for chunk in data_chunks:
                 new_packet = pkt.package_packet(source_address=self.SOURCE_ADDRESS, dest_address=self.DEST_ADDRESS,
                                     source_port=self.SOURCE_PORT, dest_port=self.DEST_PORT, 
