@@ -262,7 +262,8 @@ class TCPyClient:
     def send(self):
         while self.CURR_STATE != 'DONE':
             self.TCP_STATES[self.CURR_STATE]()
-            self.sock.close()
+            
+        self.sock.close()
         return
 
 class Main:
