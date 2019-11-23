@@ -34,6 +34,7 @@ from bitstring import BitStream
 class TCPyPacket:
     TCP_PTCL = (6).to_bytes(1, byteorder="big")
 
+    # calcs and modifies the checksum field of an outgoing packet
     def calc_checksum(packet, pseudo_header):
         # ensure checksum is 0'ed out
         packet.overwrite(b'\x00\x00', 128)
@@ -43,6 +44,7 @@ class TCPyPacket:
         checksum = cs_calc.finalbytes()
         packet.overwrite(checksum, 128)
 
+    # validates checksum of incoming packets
     def valid_checksum(source_address, dest_address, bytes_packet):
         bin_packet = BitStream(bytes=bytes_packet)
         length = len(bin_packet) % 8
@@ -56,6 +58,7 @@ class TCPyPacket:
             return False
         return True
 
+    # used to create the TCP pseudo-header to prevent misrouting, not used
     def create_pseudo_header(source_address, dest_address, length):
         pseudo_header  = bytearray()
         pseudo_header += bytearray(socket.inet_aton(source_address))
@@ -65,6 +68,7 @@ class TCPyPacket:
         pseudo_header += length.to_bytes(2, byteorder="big")
         return pseudo_header
 
+    # unpacks received packets and fills a dictionary with their relevant values for querying
     def unpack_packet(source_address, dest_address, bytes_packet):
         packet_binary = BitStream(bytes=bytes_packet)
         if not TCPyPacket.valid_checksum(source_address, dest_address, bytes_packet):
@@ -96,10 +100,12 @@ class TCPyPacket:
         except:
             return (False, False)
 
+    # checks to see if packet is a FIN packet
     def is_fin(packet_bytes):
         packet_binary = BitStream(bytes=packet_bytes)
         return packet_binary[111]
 
+    # packages package from use-to-use numbers into their binary form
     def package_packet(source_address, dest_address, source_port, dest_port, seq_num, ack_num = 0, 
                        offset = 5, ack = False, syn = False, fin = False, 
                        window = 0, data = False):

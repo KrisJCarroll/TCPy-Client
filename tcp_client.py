@@ -1,9 +1,20 @@
+# tcp_client.py
+# Author: Kristopher Carroll
+
 from TCPyPacket import TCPyPacket as pkt
 import socket as s
 import time
 import argparse
 
 MAX_BYTES = 1452
+"""
+This modular implementation of a TCP client features a robust packet engine for packing and unpacking
+TCP segments, determining their validity, and handles the main driver logic for sending files via
+TCP. This implementation uses Selective Repeat to provide reliable data transfer while maximizing the 
+available window space by allowing for unordered, non-cumulative ACKs. The implementation
+selectively retransmits packets that have been unACK'ed and have timed out (>500 ms) on a per-packet
+basis. Connections are established with a time-based Initial Sequence Number during the SYN phase of the handshake.
+"""
 
 class TCPyClient:
     #                                  SEQUENCE VARIABLES
@@ -74,7 +85,7 @@ class TCPyClient:
         self.SERVER = (self.DEST_ADDRESS, self.DEST_PORT)
         self.sock.bind(('', self.SOURCE_PORT))
         # set the time-based initial sequence number
-        self.SEQ_VARS['ISS'] = int(time.time()) % 2**32-1
+        self.SEQ_VARS['ISS'] = int(time.time()) % 2**32
 
         # set up TCP states and handlers dictionary
         self.TCP_STATES = {
@@ -199,6 +210,7 @@ class TCPyClient:
             self.SEQ_VARS['RCV.NXT'] = rec_packet['ACK_NUM'] # RCV.NXT updated to next expected seg
             self.SEQ_VARS['RCV.WND'] = rec_packet['WINDOW']
         return
+
     # handler for FIN-WAIT-1 state - the state which handles all unack'ed packets and waits for FIN or ACK of FIN back
     def handle_fin_wait_1(self):
         while self.unack_packets:
@@ -223,14 +235,8 @@ class TCPyClient:
         # all packets ACK
         self.CURR_STATE = 'DONE'
         return
-    # handler for FIN-WAIT-2 state - handles receiving a FIN from server
-    def handle_fin_wait_2(self):
-        return
-    def handle_time_wait(self):
-        return
-    def handle_closing(self):
-        return
 
+    # helper function for sending a FIN packet
     def send_fin(self):
         packet = pkt.package_packet(source_address=self.SOURCE_ADDRESS, dest_address=self.DEST_ADDRESS,
                                     source_port=self.SOURCE_PORT, dest_port=self.DEST_PORT, 
@@ -241,6 +247,7 @@ class TCPyClient:
         except s.timeout:
             return False
 
+    # helper function for sending a SYN packet
     def send_syn(self):
         packet = pkt.package_packet(source_address=self.SOURCE_ADDRESS, dest_address=self.DEST_ADDRESS,
                                     source_port=self.SOURCE_PORT, dest_port=self.DEST_PORT, 
@@ -251,6 +258,7 @@ class TCPyClient:
         except s.timeout:
             return False
     
+    # helper function for sending ACK packet
     def send_ack(self, num_to_ack):
         packet = pkt.package_packet(source_address=self.SOURCE_ADDRESS, dest_address=self.DEST_ADDRESS,
                                        source_port=self.SOURCE_PORT, dest_port=self.DEST_PORT, 
@@ -262,6 +270,7 @@ class TCPyClient:
         except s.timeout:
             return False
 
+    # main driver for managing the appropriate states for sending
     def send(self):
         print("SENDING: File = {} To: {}:{}".format(self.FILENAME, self.DEST_ADDRESS, self.DEST_PORT))
         while self.CURR_STATE != 'DONE':
@@ -302,23 +311,3 @@ class Main:
     
     tcp_client = TCPyClient(SERVER_ADDRESS, CLIENT_PORT, SERVER_PORT, FILENAME)
     tcp_client.send()
-
-"""
-    source_address = "0.0.0.0"
-    dest_address = "1.1.1.1"
-    source_port = 1007
-    dest_port = 2008
-    seq_num = 1000984
-    ack_num = 1111111
-    offset = 0
-    ack = False
-    syn = True
-    fin = False
-    window = 4000
-    data = b'24'
-    
-    packet = pkt.package_packet(source_address=source_address, dest_address=dest_address,
-                                       source_port=source_port, dest_port=dest_port, 
-                                       seq_num=seq_num, ack_num=ack_num, offset=offset, 
-                                       ack=ack, syn=syn, fin=fin, window=window, data=data)
-"""
