@@ -139,7 +139,7 @@ class TCPyClient:
         done = False
         while not done:
             # retransmit timed out packets
-            retrans_pack = {k:v for (k, v) in unack_packets.items() if time.time() - v[1] > 0.5}
+            retrans_pack = {k:v for (k, v) in self.unack_packets.items() if time.time() - v[1] > 0.5}
             for k, v in retrans_pack.items():
                 try:
                     self.sock.sendall(v[0].bytes)
