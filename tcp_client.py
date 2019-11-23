@@ -94,6 +94,8 @@ class TCPyClient:
     ############################################################################################
     # function for handling CLOSED state operations and events - this is the usual starting state
     def handle_closed(self):
+        print("Attempting to connect to {}:{}".format(self.DEST_ADDRESS, self.DEST_PORT))
+        self.sock.connect(self.SERVER)
         if self.send_syn():
             self.SEQ_VARS['SND.UNA'] = self.SEQ_VARS['ISS'] # setting earliest sent unack to ISS
             self.SEQ_VARS['SND.NXT'] = self.SEQ_VARS['ISS'] + 1 # setting next seq num to send
@@ -120,8 +122,6 @@ class TCPyClient:
                 self.SEQ_VARS['REC.NXT'] = packet['ACK_NUM'] # ACK of 101 means expecting SEQ 101
                 self.SEQ_VARS['REC.WND'] = packet['WINDOW']
                 self.send_ack(packet['SEQ_NUM'] + 1)
-                print("SYN/ACK Received: Attempting to connect to {}:{}".format(self.DEST_ADDRESS, self.DEST_PORT))
-                self.sock.connect(self.SERVER)
                 self.CURR_STATE = 'ESTABLISHED'
                 return
         except s.timeout:
