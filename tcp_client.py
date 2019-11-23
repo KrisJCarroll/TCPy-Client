@@ -291,7 +291,7 @@ class Main:
         parser.exit(message="\tERROR(args): Server port out of range\n")
     SERVER_PORT = args.sp
     print("Server port:", SERVER_PORT)
-    
+    print(s.gethostbyname(s.gethostname()))
     tcp_client = TCPyClient(SERVER_ADDRESS, CLIENT_PORT, SERVER_PORT, FILENAME)
     tcp_client.send()
 
