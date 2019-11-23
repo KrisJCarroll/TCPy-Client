@@ -89,7 +89,7 @@ class TCPyClient:
             'CLOSING': self.handle_closing,
             'TIME-WAIT': self.handle_time_wait,
         }
-        
+
         self.unack_packets = {}
 
     #                               CONNECTION STATE HANDLERS
@@ -266,7 +266,6 @@ class Main:
     parser.add_argument("-f", required=True, type=str, help="supply a filename in string format")
     parser.add_argument("-cp", required=True, type=int, help="supply client port information")
     parser.add_argument("-sp", required=True, type=int, help="supply server port information")
-    parser.add_argument("-m", required=True, choices=['r', 'w'], help="choose either (r)ead or (w)rite mode")
 
     args = parser.parse_args()
 
