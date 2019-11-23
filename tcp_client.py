@@ -120,7 +120,7 @@ class TCPyClient:
                 self.SEQ_VARS['REC.NXT'] = packet['ACK_NUM'] # ACK of 101 means expecting SEQ 101
                 self.SEQ_VARS['REC.WND'] = packet['WINDOW']
                 self.send_ack(packet['SEQ_NUM'] + 1)
-                self.unack_packets[packet['SEQ_NUM']+1] = (None, None)
+                self.unack_packets[packet['SEQ_NUM']+1] = (None, time.time())
                 self.CURR_STATE = 'ESTABLISHED'
                 return
         except s.timeout:
