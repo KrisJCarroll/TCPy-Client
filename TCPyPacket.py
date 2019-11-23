@@ -44,7 +44,7 @@ class TCPyPacket:
         packet.overwrite(checksum, 128)
 
     def valid_checksum(source_address, dest_address, bytes_packet):
-        bin_packet = BitStream(bytes_packet)
+        bin_packet = BitStream(bytes=bytes_packet)
         length = len(bin_packet) % 8
         checksum = bin_packet[128:144].bytes
         pseudo_header = TCPyPacket.create_pseudo_header(source_address, dest_address, length)
@@ -125,7 +125,7 @@ class TCPyPacket:
         pseudo_header = TCPyPacket.create_pseudo_header(source_address, dest_address, length)
 
 
-        TCPyPacket.calc_checksum(packet, pseudo_header)
+        TCPyPacket.calc_checksum(packet.bytes, pseudo_header)
 
         return packet
 
