@@ -69,10 +69,15 @@ class TCPyClient:
         self.file = open(filename, "rb")
         # create socket and apply the appropriate connection information
         self.sock = s.socket(s.AF_INET, s.SOCK_STREAM)
+        self.listen = s.socket(s.AF_INET, s.SOCK_STREAM)
         self.SOURCE_ADDRESS = s.gethostbyname(s.gethostname())
         self.DEST_ADDRESS = dest_address
         self.SOURCE_PORT = source_port
         self.DEST_PORT = dest_port
+        self.listen.bind((self.SOURCE_ADDRESS, self.SOURCE_PORT))
+        self.listen.listen(5)
+        c,addr = self.listen.accept()
+        print("Got connection from {}".format(addr))
         self.SERVER = (self.DEST_ADDRESS, self.DEST_PORT)
         # set the time-based initial sequence number
         self.SEQ_VARS['ISS'] = int(time.time()) % 2**32 
