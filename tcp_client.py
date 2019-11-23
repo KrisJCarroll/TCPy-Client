@@ -118,6 +118,7 @@ class TCPyClient:
                     self.sock.close()
                     exit(1)
                 self.SEQ_VARS['REC.NXT'] = packet['ACK_NUM'] # ACK of 101 means expecting SEQ 101
+                print(packet['WINDOW'])
                 self.SEQ_VARS['REC.WND'] = packet['WINDOW']
                 self.send_ack(packet['SEQ_NUM'] + 1)
                 self.unack_packets[packet['ACK_NUM']] = (None, time.time())
