@@ -120,6 +120,7 @@ class TCPyClient:
                 self.SEQ_VARS['REC.NXT'] = packet['ACK_NUM'] # ACK of 101 means expecting SEQ 101
                 self.SEQ_VARS['REC.WND'] = packet['WINDOW']
                 self.send_ack(packet['SEQ_NUM'] + 1)
+                print("SYN/ACK Received: Attempting to connect to {}:{}".format(self.DEST_ADDRESS, self.DEST_PORT))
                 self.sock.connect(self.SERVER)
                 self.CURR_STATE = 'ESTABLISHED'
                 return
