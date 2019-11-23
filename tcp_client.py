@@ -75,7 +75,7 @@ class TCPyClient:
         self.DEST_PORT = dest_port
         self.SERVER = (self.DEST_ADDRESS, self.DEST_PORT)
         # connect to the server
-        self.sock.connect(self.DEST_ADDRESS, self.DEST_PORT)
+        self.sock.connect((self.DEST_ADDRESS, self.DEST_PORT))
         # set the time-based initial sequence number
         self.SEQ_VARS['ISS'] = int(time.time()) % 2**32 
 
