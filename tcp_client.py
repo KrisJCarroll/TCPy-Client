@@ -113,7 +113,7 @@ class TCPyClient:
     def handle_syn_sent(self):
         try:
             bytes_packet = self.sock.recv(4096)
-            packet = pkt.unpack_packet(bytes_packet)
+            packet = pkt.unpack_packet(self.SOURCE_ADDRESS, self.DEST_ADDRESS, bytes_packet)
             if packet['ACK'] and packet['SYN']:
                 if packet['ACK_NUM'] != self.SEQ_VARS['SND.NXT']:
                     print("ERROR({}): Wrong ACK for handshake.".format(self.CURR_STATE))
@@ -187,7 +187,7 @@ class TCPyClient:
             
             # wait for ACKs - we've sent everything we can and there's nothing to do until then
             bytes_packet = self.sock.recv(4096)
-            rec_packet = pkt.unpack_packet(bytes_packet)
+            rec_packet = pkt.unpack_packet(self.SOURCE_ADDRESS, self.DEST_ADDRESS, bytes_packet)
             if not rec_packet or not rec_packet.get('ACK'):
                 print("ERROR({}): Packet received was not an ACK.")
                 continue
@@ -212,7 +212,7 @@ class TCPyClient:
                     exit(1)
             # wait for ACKs
             bytes_packet = self.sock.recv(4096)
-            rec_packet = pkt.unpack_packet(bytes_packet)
+            rec_packet = pkt.unpack_packet(self.SOURCE_ADDRESS, self.DEST_ADDRESS, bytes_packet)
             if not rec_packet or not rec_packet.get('ACK'):
                 print("ERROR({}): Packet received was not an ACK.")
                 continue
