@@ -73,7 +73,8 @@ class TCPyClient:
         self.DEST_ADDRESS = dest_address
         self.SOURCE_PORT = source_port
         self.DEST_PORT = dest_port
-        self.SERVER = ('127.0.1.1', self.DEST_PORT)
+        print("Connecting to {}:{}".format(self.SOURCE_ADDRESS,self.DEST_PORT))
+        self.SERVER = (self.SOURCE_ADDRESS, self.DEST_PORT)
         # set the time-based initial sequence number
         self.SEQ_VARS['ISS'] = int(time.time()) % 2**32 
 
