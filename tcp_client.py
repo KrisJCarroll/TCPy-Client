@@ -117,7 +117,7 @@ class TCPyClient:
                     print("Shutting down client.")
                     self.sock.close()
                     exit(1)
-                self.SEQ_VARS['RCV.NXT'] = packet['ACK_NUM'] # ACK of 101 means expecting SEQ 101
+                self.SEQ_VARS['SND.NXT'] = packet['ACK_NUM'] # ACK of 101 means expecting SEQ 101
                 self.SEQ_VARS['RCV.WND'] = packet['WINDOW']
                 self.send_ack(packet['SEQ_NUM'] + 1)
                 self.unack_packets[packet['ACK_NUM']] = (None, time.time())
@@ -151,10 +151,7 @@ class TCPyClient:
 
             # grab the next bytes available to send - may be nothing if we didn't get an increase in window size
             start_index = self.SEQ_VARS['SND.NXT'] - self.SEQ_VARS['ISS'] - 1
-            print(start_index)
-            print(self.SEQ_VARS['RCV.WND'])
-            end_index = (self.SEQ_VARS['SND.UNA'] + int(self.SEQ_VARS['RCV.WND'])) - self.SEQ_VARS['ISS'] - 1
-            print(end_index)
+            end_index = (self.SEQ_VARS['SND.UNA'] + self.SEQ_VARS['RCV.WND']) - self.SEQ_VARS['ISS'] - 1
             if end_index >= bytes_size - 1:
                 done = True
             new_size = end_index - start_index
@@ -197,7 +194,7 @@ class TCPyClient:
             if self.unack_packets:
                 self.SEQ_VARS['SND.UNA'] = min(self.unack_packets, key=self.unack_packets.get) # update SND.UNA to oldest unack left
             self.SEQ_VARS['RCV.NXT'] = rec_packet['ACK_NUM'] # RCV.NXT updated to next expected seg
-            self.SEQ_VARS['REC.WND'] = rec_packet['WINDOW']
+            self.SEQ_VARS['RCV.WND'] = rec_packet['WINDOW']
         return
     # handler for FIN-WAIT-1 state - the state which handles all unack'ed packets and waits for FIN or ACK of FIN back
     def handle_fin_wait_1(self):
