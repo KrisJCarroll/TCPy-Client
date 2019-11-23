@@ -250,7 +250,7 @@ class TCPyClient:
     
     def send_ack(self, num_to_ack):
         packet = pkt.package_packet(source_address=self.SOURCE_ADDRESS, dest_address=self.DEST_ADDRESS,
-                                       source_port=self.source_port, dest_port=self.dest_port, 
+                                       source_port=self.SOURCE_PORT, dest_port=self.DEST_PORT, 
                                        seq_num=self.SEQ_VARS['SND.NXT'], ack_num=num_to_ack,
                                        ack=True, window=0)
         try:
