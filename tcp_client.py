@@ -160,6 +160,8 @@ class TCPyClient:
 
             data_chunks = [new_data[i * MAX_BYTES : (i+1) * MAX_BYTES] for i in range((len(new_data) // MAX_BYTES) + 1)]
             for chunk in data_chunks:
+                if len(chunk) == 0:
+                    break
                 new_packet = pkt.package_packet(source_address=self.SOURCE_ADDRESS, dest_address=self.DEST_ADDRESS,
                                     source_port=self.SOURCE_PORT, dest_port=self.DEST_PORT, 
                                     seq_num=self.SEQ_VARS['SND.NXT'], data=chunk)
