@@ -190,7 +190,7 @@ class TCPyClient:
                 print("ERROR({}): Packet received was not an ACK.")
                 continue
             self.unack_packets.pop(rec_packet['ACK_NUM'])
-            self.SEQ_VARS['SND.UNA'] = min(unack_packets, key=unack_packets.get) # update SND.UNA to oldest unack left
+            self.SEQ_VARS['SND.UNA'] = min(self.unack_packets, key=self.unack_packets.get) # update SND.UNA to oldest unack left
             self.SEQ_VARS['RCV.NXT'] = rec_packet['ACK_NUM'] # RCV.NXT updated to next expected seg
             self.SEQ_VARS['REC.WND'] = rec_packet['WINDOW']
         return
