@@ -93,9 +93,6 @@ class TCPyClient:
             'SYN-SENT': self.handle_syn_sent,
             'ESTABLISHED': self.handle_established,
             'FIN-WAIT-1': self.handle_fin_wait_1,
-            'FIN-WAIT-2': self.handle_fin_wait_2,
-            'CLOSING': self.handle_closing,
-            'TIME-WAIT': self.handle_time_wait,
         }
 
         self.unack_packets = {}
