@@ -117,8 +117,7 @@ class TCPyClient:
                     print("Shutting down client.")
                     self.sock.close()
                     exit(1)
-                self.SEQ_VARS['REC.NXT'] = packet['ACK_NUM'] # ACK of 101 means expecting SEQ 101
-                print(packet['WINDOW'])
+                self.SEQ_VARS['SND.NXT'] = packet['ACK_NUM'] # ACK of 101 means expecting SEQ 101
                 self.SEQ_VARS['REC.WND'] = packet['WINDOW']
                 self.send_ack(packet['SEQ_NUM'] + 1)
                 self.unack_packets[packet['ACK_NUM']] = (None, time.time())
@@ -154,7 +153,7 @@ class TCPyClient:
             start_index = self.SEQ_VARS['SND.NXT'] - self.SEQ_VARS['ISS']
             print(start_index)
             print(self.SEQ_VARS['RCV.WND'])
-            end_index = (self.SEQ_VARS['SND.UNA'] + self.SEQ_VARS['RCV.WND']) - self.SEQ_VARS['ISS']
+            end_index = (self.SEQ_VARS['SND.UNA'] + int(self.SEQ_VARS['RCV.WND'])) - self.SEQ_VARS['ISS']
             print(end_index)
             if end_index >= bytes_size - 1:
                 done = True
