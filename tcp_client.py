@@ -24,15 +24,12 @@ class TCPyClient:
     #           if seq_num > RCV.NXT + RCV.WND - future sequence numbers not allowed
     ############################################################################################
     SEQ_VARS = {
-        'SND.UNA' : 'first unacknowledged',
-        'SND.NXT' : 'send next',
-        'SND.WND' : 'send window',
-        'SND.UP'  : 'send urgent pointer',
-        'SND.WL1' : 'seg. seq. num for last window',
-        'SND.WL2' : 'seg. ack num for last window',
-        'RCV.NXT' : 'next seq num expected from server', 
-        'RCV.WND' : 'size of window server will receive',
-        'ISS'     : 'initial send sequence number'
+        'SND.UNA' : 0,
+        'SND.NXT' : 0,
+        'SND.WND' : 0,
+        'RCV.NXT' : 0, 
+        'RCV.WND' : 0,
+        'ISS'     : 0
     }
 
 
