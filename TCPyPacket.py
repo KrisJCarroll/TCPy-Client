@@ -125,7 +125,7 @@ class TCPyPacket:
         pseudo_header = TCPyPacket.create_pseudo_header(source_address, dest_address, length)
 
 
-        TCPyPacket.calc_checksum(packet.bytes, pseudo_header)
+        TCPyPacket.calc_checksum(packet, pseudo_header)
 
         return packet
 
