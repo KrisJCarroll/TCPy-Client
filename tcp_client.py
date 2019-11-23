@@ -63,7 +63,7 @@ class TCPyClient:
     
 
     def __init__(self, dest_address, source_port, dest_port, filename):
-        self.FILENAME
+        self.FILENAME = filename
         self.file = open(filename, "rb")
         # create socket and apply the appropriate connection information
         self.sock = s.socket(s.AF_INET, s.SOCK_DGRAM)
