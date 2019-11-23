@@ -150,7 +150,7 @@ class TCPyClient:
                     exit(1)
 
             # grab the next bytes available to send - may be nothing if we didn't get an increase in window size
-            start_index = self.SEQ_VARS['SND.NXT'] - self.SEQ_VARS['ISS']
+            start_index = self.SEQ_VARS['SND.NXT'] - self.SEQ_VARS['ISS'] - 1
             print(start_index)
             print(self.SEQ_VARS['RCV.WND'])
             end_index = (self.SEQ_VARS['SND.UNA'] + int(self.SEQ_VARS['RCV.WND'])) - self.SEQ_VARS['ISS']
@@ -168,7 +168,7 @@ class TCPyClient:
                 # send the packets and handle errors
                 try:
                     start_time = time.time()
-                    self.sock.send(new_packet)
+                    self.sock.sendall(new_packet.bytes)
                     # update SND.NXT and add packet to list of unack'ed packets with timer
                     self.SEQ_VARS['SND.NXT'] += len(chunk)
                     self.unack_packets[self.SEQ_VARS['SND.NXT']] = (new_packet, start_time)
