@@ -193,7 +193,7 @@ class TCPyClient:
                 continue
             self.unack_packets.pop(rec_packet['ACK_NUM'])
             if self.unack_packets:
-                self.SEQ_VARS['SND.UNA'] = min(self.unack_packets, key=self.unack_packets.get) # update SND.UNA to oldest unack left
+                self.SEQ_VARS['SND.UNA'] = min(self.unack_packets.keys(), key=self.unack_packets.get) # update SND.UNA to oldest unack left
             self.SEQ_VARS['RCV.NXT'] = rec_packet['ACK_NUM'] # RCV.NXT updated to next expected seg
             self.SEQ_VARS['RCV.WND'] = rec_packet['WINDOW']
         return
