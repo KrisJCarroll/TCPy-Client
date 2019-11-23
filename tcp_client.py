@@ -254,7 +254,7 @@ class TCPyClient:
 
     def send(self):
         while self.CURR_STATE != 'DONE':
-            self.TCP_STATES(self.CURR_STATE)
+            self.TCP_STATES[self.CURR_STATE]()
         return
 
 class Main:
