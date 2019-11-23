@@ -279,7 +279,7 @@ class Main:
     # *** THIS IS MUCH PRETTIER THAN USING choices=range(5000, 65535) in add_argument()!!!!!!! ***
     if args.cp < 5000 or args.cp > 65535:
         parser.exit(message="\tERROR(args): Client port out of range\n")
-    CLIENT_PORT = args.p
+    CLIENT_PORT = args.cp
     print("Client port:", CLIENT_PORT)
     # checking for appropriate server port numbers
     if args.sp < 5000 or args.sp > 65535:
