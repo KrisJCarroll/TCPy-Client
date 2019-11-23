@@ -100,7 +100,7 @@ class TCPyPacket:
         packet_binary = BitStream(bytes=packet_bytes)
         return packet_binary[111]
 
-    def package_packet(source_address, dest_address, source_port, dest_port, seq_num, ack_num, 
+    def package_packet(source_address, dest_address, source_port, dest_port, seq_num, ack_num = 0, 
                        offset = 5, ack = False, syn = False, fin = False, 
                        window = 0, data = None):
         packet_dict = {'source_port': source_port, 'dest_port': dest_port,
