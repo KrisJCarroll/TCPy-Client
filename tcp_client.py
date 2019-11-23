@@ -73,7 +73,7 @@ class TCPyClient:
         self.DEST_ADDRESS = dest_address
         self.SOURCE_PORT = source_port
         self.DEST_PORT = dest_port
-        self.SERVER = ('localhost', self.DEST_PORT)
+        self.SERVER = ('127.0.1.1', self.DEST_PORT)
         # set the time-based initial sequence number
         self.SEQ_VARS['ISS'] = int(time.time()) % 2**32 
 
@@ -291,7 +291,7 @@ class Main:
         parser.exit(message="\tERROR(args): Server port out of range\n")
     SERVER_PORT = args.sp
     print("Server port:", SERVER_PORT)
-    print(s.gethostbyname(s.gethostname()))
+    
     tcp_client = TCPyClient(SERVER_ADDRESS, CLIENT_PORT, SERVER_PORT, FILENAME)
     tcp_client.send()
 
