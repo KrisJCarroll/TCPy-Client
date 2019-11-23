@@ -150,7 +150,9 @@ class TCPyClient:
 
             # grab the next bytes available to send - may be nothing if we didn't get an increase in window size
             start_index = self.SEQ_VARS['SND.NXT'] - self.SEQ_VARS['ISS']
+            print(start_index)
             end_index = (self.SEQ_VARS['SND.UNA'] + self.SEQ_VARS['RCV.WND']) - self.SEQ_VARS['ISS']
+            print(end_index)
             if end_index >= bytes_size - 1:
                 done = True
             new_size = end_index - start_index
