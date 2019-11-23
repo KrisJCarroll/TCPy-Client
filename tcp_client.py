@@ -240,7 +240,7 @@ class TCPyClient:
     def send_syn(self):
         packet = pkt.package_packet(source_address=self.SOURCE_ADDRESS, dest_address=self.DEST_ADDRESS,
                                     source_port=self.SOURCE_PORT, dest_port=self.DEST_PORT, 
-                                    seq_num=self.SEQ_VARS['ISS'], syn=True)
+                                    seq_num=self.SEQ_VARS['ISS'], syn=True, data=None)
         try:
             self.sock.sendall(packet.bytes)
             return True

@@ -39,7 +39,7 @@ class TCPyPacket:
         packet.overwrite(b'\x00\x00', 128)
         cs_calc = cs.Checksum16()
         cs_calc.process(packet.tobytes())
-        #cs_calc.process(pseudo_header)
+        cs_calc.process(pseudo_header)
         checksum = cs_calc.finalbytes()
         packet.overwrite(checksum, 128)
 
@@ -51,7 +51,7 @@ class TCPyPacket:
         bin_packet.overwrite(b'\x00\x00', 128)
         cs_calc = cs.Checksum16()
         cs_calc.process(bin_packet.tobytes())
-        #cs_calc.process(pseudo_header)
+        cs_calc.process(pseudo_header)
         if checksum != cs_calc.finalbytes():
             return False
         return True
