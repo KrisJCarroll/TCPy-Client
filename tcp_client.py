@@ -121,7 +121,7 @@ class TCPyClient:
                 self.SEQ_VARS['SND.NXT'] = packet['ACK_NUM'] # ACK of 101 means expecting SEQ 101
                 self.SEQ_VARS['RCV.WND'] = packet['WINDOW']
                 self.send_ack(packet['SEQ_NUM'] + 1)
-                self.unack_packets[packet['ACK_NUM']] = (None, time.time())
+                self.unack_packets[packet['ACK_NUM']] = (packet['ACK_NUM'], None, time.time())
                 self.SEQ_VARS['SND.UNA'] = packet['ACK_NUM']
                 self.CURR_STATE = 'ESTABLISHED'
                 return
@@ -143,7 +143,7 @@ class TCPyClient:
             for k, v in retrans_pack.items():
                 try:
                     self.sock.sendall(v[0].bytes)
-                    self.unack_packets[k] = (v[0], time.time())
+                    self.unack_packets[k] = (v[0],v[1], time.time())
                 except s.timeout:
                     print("ERROR({}): Error retransmitting expired packet (seq = {}).".format(self.CURR_STATE, k))
                     print("Shutting down client.")
@@ -169,7 +169,7 @@ class TCPyClient:
                     self.sock.sendall(new_packet.bytes)
                     # update SND.NXT and add packet to list of unack'ed packets with timer
                     self.SEQ_VARS['SND.NXT'] += len(chunk)
-                    self.unack_packets[self.SEQ_VARS['SND.NXT']] = (new_packet, start_time)
+                    self.unack_packets[self.SEQ_VARS['SND.NXT']] = (self.SEQ_VARS['SND.NXT'],new_packet, start_time)
                     
                 except s.timeout:
                     print("ERROR({}): Error sending packet (seq = {}).".format(self.CURR_STATE, self.SEQ_VARS['SND.NXT']))
@@ -193,7 +193,7 @@ class TCPyClient:
                 continue
             self.unack_packets.pop(rec_packet['ACK_NUM'])
             if self.unack_packets:
-                self.SEQ_VARS['SND.UNA'] = min(self.unack_packets.keys(), key=self.unack_packets.get) # update SND.UNA to oldest unack left
+                self.SEQ_VARS['SND.UNA'] = min(self.unack_packets, key=self.unack_packets.get) # update SND.UNA to oldest unack left
             self.SEQ_VARS['RCV.NXT'] = rec_packet['ACK_NUM'] # RCV.NXT updated to next expected seg
             self.SEQ_VARS['RCV.WND'] = rec_packet['WINDOW']
         return
@@ -204,8 +204,8 @@ class TCPyClient:
             retrans_pack = {k:v for (k, v) in self.unack_packets.items() if time.time() - v[1] > 0.5}
             for k, v in retrans_pack.items():
                 try:
-                    self.sock.sendall(v[0].bytes)
-                    unack_packets[k] = (v[0], time.time())
+                    self.sock.sendall(v[1].bytes)
+                    self.unack_packets[k] = (v[0], v[1], time.time())
                 except s.timeout:
                     print("ERROR({}): Error retransmitting expired packet (seq = {}).".format(self.CURR_STATE, k))
                     print("Shutting down client.")
