@@ -70,10 +70,10 @@ class TCPyPacket:
         if not TCPyPacket.valid_checksum(source_address, dest_address, bytes_packet):
             return None
         packet_dict = {
-            'S_PORT' : packet_binary[0:16].uint16,
-            'D_PORT' : packet_binary[16:32].uint16,
-            'SEQ_NUM': packet_binary[32:64].uint32,
-            'ACK_NUM': packet_binary[64:96].uint32,
+            'S_PORT' : packet_binary[0:16].uint,
+            'D_PORT' : packet_binary[16:32].uint,
+            'SEQ_NUM': packet_binary[32:64].uint,
+            'ACK_NUM': packet_binary[64:96].uint,
             'OFFSET' : packet_binary[96:100].uint,
             'ACK'    : packet_binary[107],
             'SYN'    : packet_binary[110],
