@@ -261,7 +261,7 @@ class TCPyClient:
             return False
 
     def send(self):
-        print("SENDING: File = {} To: {}:{}".format(self.FILENAME, self.DEST_ADDRESS, self.DEST_PORT)
+        print("SENDING: File = {} To: {}:{}".format(self.FILENAME, self.DEST_ADDRESS, self.DEST_PORT))
         while self.CURR_STATE != 'DONE':
             self.TCP_STATES[self.CURR_STATE]()
             
