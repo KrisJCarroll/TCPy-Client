@@ -121,6 +121,7 @@ class TCPyClient:
                 self.SEQ_VARS['REC.WND'] = packet['WINDOW']
                 self.send_ack(packet['SEQ_NUM'] + 1)
                 self.unack_packets[packet['ACK_NUM']] = (None, time.time())
+                self.SEQ_VARS['SND.UNA'] = packet['ACK_NUM']
                 self.CURR_STATE = 'ESTABLISHED'
                 return
         except s.timeout:
