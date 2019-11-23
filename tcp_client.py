@@ -120,6 +120,7 @@ class TCPyClient:
                 self.SEQ_VARS['REC.NXT'] = packet['ACK_NUM'] # ACK of 101 means expecting SEQ 101
                 self.SEQ_VARS['REC.WND'] = packet['WINDOW']
                 self.send_ack(packet['SEQ_NUM'] + 1)
+                self.unack_packets[packet['SEQ_NUM']+1] = (None, None)
                 self.CURR_STATE = 'ESTABLISHED'
                 return
         except s.timeout:
@@ -140,7 +141,7 @@ class TCPyClient:
             for k, v in retrans_pack.items():
                 try:
                     self.sock.sendall(v[0].bytes)
-                    unack_packets[k] = (v[0], time.time())
+                    self.unack_packets[k] = (v[0], time.time())
                 except s.timeout:
                     print("ERROR({}): Error retransmitting expired packet (seq = {}).".format(self.CURR_STATE, k))
                     print("Shutting down client.")
