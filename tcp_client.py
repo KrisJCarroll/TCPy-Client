@@ -74,8 +74,6 @@ class TCPyClient:
         self.SOURCE_PORT = source_port
         self.DEST_PORT = dest_port
         self.SERVER = (self.DEST_ADDRESS, self.DEST_PORT)
-        # connect to the server
-        self.sock.connect((self.DEST_ADDRESS, self.DEST_PORT))
         # set the time-based initial sequence number
         self.SEQ_VARS['ISS'] = int(time.time()) % 2**32 
 
@@ -122,6 +120,7 @@ class TCPyClient:
                 self.SEQ_VARS['REC.NXT'] = packet['ACK_NUM'] # ACK of 101 means expecting SEQ 101
                 self.SEQ_VARS['REC.WND'] = packet['WINDOW']
                 self.send_ack(packet['SEQ_NUM'] + 1)
+                self.sock.connect(self.SERVER)
                 self.CURR_STATE = 'ESTABLISHED'
                 return
         except s.timeout:
