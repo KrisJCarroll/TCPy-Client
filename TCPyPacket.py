@@ -43,7 +43,7 @@ class TCPyPacket:
         checksum = cs_calc.finalbytes()
         packet.overwrite(checksum, 128)
 
-    def valid_checksum(bytes_packet, source_address, dest_address):
+    def valid_checksum(source_address, dest_address, bytes_packet):
         bin_packet = BitStream(bytes_packet)
         length = len(bin_packet) % 8
         checksum = bin_packet[128:144].bytes
