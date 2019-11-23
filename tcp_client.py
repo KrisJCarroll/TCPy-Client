@@ -140,7 +140,7 @@ class TCPyClient:
             retrans_pack = {k:v for (k, v) in unack_packets.items() if time.time() - v[1] > 0.5}
             for k, v in retrans_pack.items():
                 try:
-                    self.sock.sendall(v[0])
+                    self.sock.sendall(v[0].bytes)
                     unack_packets[k] = (v[0], time.time())
                 except s.timeout:
                     print("ERROR({}): Error retransmitting expired packet (seq = {}).".format(self.CURR_STATE, k))
@@ -201,7 +201,7 @@ class TCPyClient:
             retrans_pack = {k:v for (k, v) in unack_packets.items() if time.time() - v[1] > 0.5}
             for k, v in retrans_pack.items():
                 try:
-                    self.sock.sendall(v[0])
+                    self.sock.sendall(v[0].bytes)
                     unack_packets[k] = (v[0], time.time())
                 except s.timeout:
                     print("ERROR({}): Error retransmitting expired packet (seq = {}).".format(self.CURR_STATE, k))
@@ -231,7 +231,7 @@ class TCPyClient:
                                     source_port=self.SOURCE_PORT, dest_port=self.DEST_PORT, 
                                     seq_num=self.SEQ_VARS['SND.NXT'], fin=True)
         try:
-            self.sock.sendall(packet)
+            self.sock.sendall(packet.bytes)
             return True
         except s.timeout:
             return False
@@ -241,7 +241,7 @@ class TCPyClient:
                                     source_port=self.SOURCE_PORT, dest_port=self.DEST_PORT, 
                                     seq_num=self.SEQ_VARS['ISS'], syn=True)
         try:
-            self.sock.sendall(packet)
+            self.sock.sendall(packet.bytes)
             return True
         except s.timeout:
             return False
@@ -251,6 +251,11 @@ class TCPyClient:
                                        source_port=self.source_port, dest_port=self.dest_port, 
                                        seq_num=self.SEQ_VARS['SND.NXT'], ack_num=num_to_ack,
                                        ack=True, window=0)
+        try:
+            self.sock.sendall(packet.bytes)
+            return True
+        except s.timeout:
+            return False
 
     def send(self):
         while self.CURR_STATE != 'DONE':
