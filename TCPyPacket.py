@@ -80,7 +80,6 @@ class TCPyPacket:
             'FIN'    : packet_binary[111],
             'WINDOW' : packet_binary[112:128].uint,
         }
-        print(packet_dict['WINDOW'])
         return packet_dict
 
     # returns syn/ack'ed seq number and ack number if SYN and ACK set, else returns (False, False)
