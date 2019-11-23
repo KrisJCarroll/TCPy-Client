@@ -112,7 +112,7 @@ class TCPyClient:
     # function for handling SYN-SENT state operations and events
     def handle_syn_sent(self):
         try:
-            bytes_packet = self.sock.recvfrom(4096)
+            bytes_packet, address = self.sock.recvfrom(4096)
             packet = pkt.unpack_packet(self.SOURCE_ADDRESS, self.DEST_ADDRESS, bytes_packet)
             if packet['ACK'] and packet['SYN']:
                 if packet['ACK_NUM'] != self.SEQ_VARS['SND.NXT']:
@@ -186,7 +186,7 @@ class TCPyClient:
                 return
             
             # wait for ACKs - we've sent everything we can and there's nothing to do until then
-            bytes_packet = self.sock.recvfrom(4096)
+            bytes_packet, address = self.sock.recvfrom(4096)
             rec_packet = pkt.unpack_packet(self.SOURCE_ADDRESS, self.DEST_ADDRESS, bytes_packet)
             if not rec_packet or not rec_packet.get('ACK'):
                 print("ERROR({}): Packet received was not an ACK.")
@@ -211,7 +211,7 @@ class TCPyClient:
                     self.sock.close()
                     exit(1)
             # wait for ACKs
-            bytes_packet = self.sock.recvfrom(4096)
+            bytes_packet, address = self.sock.recvfrom(4096)
             rec_packet = pkt.unpack_packet(self.SOURCE_ADDRESS, self.DEST_ADDRESS, bytes_packet)
             if not rec_packet or not rec_packet.get('ACK'):
                 print("ERROR({}): Packet received was not an ACK.")
