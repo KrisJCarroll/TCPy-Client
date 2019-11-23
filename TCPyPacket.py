@@ -66,7 +66,7 @@ class TCPyPacket:
         return pseudo_header
 
     def unpack_packet(source_address, dest_address, bytes_packet):
-        packet_binary = BitStream(bytes_packet)
+        packet_binary = BitStream(bytes=bytes_packet)
         if not TCPyPacket.valid_checksum(source_address, dest_address, bytes_packet):
             return None
         packet_dict = {
