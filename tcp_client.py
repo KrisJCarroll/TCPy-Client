@@ -277,7 +277,7 @@ class Main:
     print("Filename:", FILENAME)
     # checking for appropriate port numbers
     # *** THIS IS MUCH PRETTIER THAN USING choices=range(5000, 65535) in add_argument()!!!!!!! ***
-    if args.p < 5000 or args.p > 65535:
+    if args.cp < 5000 or args.cp > 65535:
         parser.exit(message="\tERROR(args): Client port out of range\n")
     CLIENT_PORT = args.p
     print("Client port:", CLIENT_PORT)
