@@ -98,7 +98,7 @@ class TCPyClient:
         print("Attempting to connect to {}:{}".format(self.DEST_ADDRESS, self.DEST_PORT))
         self.sock.connect(self.SERVER)
         if self.send_syn():
-            self.SEQ_VARS['SND.UNA'] = self.SEQ_VARS['ISS'] # setting earliest sent unack to ISS
+            self.SEQ_VARS['SND.UNA'] = int(self.SEQ_VARS['ISS']) # setting earliest sent unack to ISS
             self.SEQ_VARS['SND.NXT'] = self.SEQ_VARS['ISS'] + 1 # setting next seq num to send
             self.CURR_STATE = 'SYN-SENT'
             return
