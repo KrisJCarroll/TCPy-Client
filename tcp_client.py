@@ -63,6 +63,7 @@ class TCPyClient:
     
 
     def __init__(self, dest_address, source_port, dest_port, filename):
+        self.FILENAME
         self.file = open(filename, "rb")
         # create socket and apply the appropriate connection information
         self.sock = s.socket(s.AF_INET, s.SOCK_DGRAM)
@@ -260,9 +261,11 @@ class TCPyClient:
             return False
 
     def send(self):
+        print("SENDING: File = {} To: {}:{}".format(self.FILENAME, self.DEST_ADDRESS, self.DEST_PORT)
         while self.CURR_STATE != 'DONE':
             self.TCP_STATES[self.CURR_STATE]()
             
+        print("Done sending, closing connection.")
         self.sock.close()
         return
 
