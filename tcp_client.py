@@ -73,7 +73,7 @@ class TCPyClient:
         self.DEST_ADDRESS = dest_address
         self.SOURCE_PORT = source_port
         self.DEST_PORT = dest_port
-        self.SERVER = (DEST_ADDRESS, DEST_PORT)
+        self.SERVER = (self.DEST_ADDRESS, self.DEST_PORT)
         # connect to the server
         self.sock.connect(self.SERVER)
         # set the time-based initial sequence number
