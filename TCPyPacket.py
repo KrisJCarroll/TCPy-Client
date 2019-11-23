@@ -117,12 +117,10 @@ class TCPyPacket:
         pack_format += ' bytes:2=checksum, uint:16=urgent,'
         header_binary = bs.pack(pack_format, **packet_dict)
         # combine the header and the data binary
-        if data:
-            data_binary = BitStream(bytes=data)
-            packet = header_binary + data_binary
+        data_binary = BitStream(bytes=data)
+        packet = header_binary + data_binary
         # no data
-        else:
-            packet = header_binary
+
         length = len(packet) % 8
         pseudo_header = TCPyPacket.create_pseudo_header(source_address, dest_address, length)
 
